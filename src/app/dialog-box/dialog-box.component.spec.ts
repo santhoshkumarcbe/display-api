@@ -1,18 +1,18 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { DisplayApiDataComponent } from './display-api-data.component';
+import { DialogBoxComponent } from './dialog-box.component';
 
-describe('DisplayApiDataComponent', () => {
-  let component: DisplayApiDataComponent;
-  let fixture: ComponentFixture<DisplayApiDataComponent>;
+describe('DialogBoxComponent', () => {
+  let component: DialogBoxComponent;
+  let fixture: ComponentFixture<DialogBoxComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-    imports: [DisplayApiDataComponent]
-})
+      declarations: [ DialogBoxComponent ]
+    })
     .compileComponents();
 
-    fixture = TestBed.createComponent(DisplayApiDataComponent);
+    fixture = TestBed.createComponent(DialogBoxComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

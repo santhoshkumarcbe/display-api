@@ -1,1 +1,30 @@
-<p>display-api-data works!</p>
+<h1>User details</h1>
+
+<table>
+  <thead>
+    <tr>
+      <th>ID</th>
+      <th>Name</th>
+      <th>Username</th>
+      <th>Email</th>
+      <th>City</th>
+      <th>Phone</th>
+      <th>Website</th>
+      <th>Company</th>
+      <th>Edit</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr *ngFor="let user of users">
+      <td>{{user.id}}</td>
+      <td>{{user.name}}</td>
+      <td>{{user.username}}</td>
+      <td>{{user.email}}</td>
+      <td>{{user.address.city}}</td>
+      <td>{{user.phone}}</td>
+      <td>{{user.website}}</td>
+      <td>{{user.company.name}}</td>
+      <td><button class="edit-button" (click)="openDialog(user)">edit</button></td>
+    </tr>
+  </tbody>
+</table>

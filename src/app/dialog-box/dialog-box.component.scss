@@ -1,0 +1,51 @@
+.dialog-box{
+    margin: 40px;
+}
+
+.form{
+    background-color: white;
+}
+
+// input{
+//     padding: 10px;
+//     background-color: #f2f2f2;
+// }
+
+.input-box{
+    // width: 340px;
+    // height: 70px;
+    // background-color: #f2f2f2;
+}
+
+.ok{
+    transition: 1000ms;
+    margin: 10px;
+    padding: 10px 20px;
+    background-color: #00cc3a;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.ok:hover {
+    // transition: 1000ms;
+    // padding: 10px 20px;
+    // transform: translateY(-0px);
+    background-color: #04ae34;
+}
+
+.cancel {
+    transition: 1000ms;
+    margin: 10px;
+    padding: 10px 20px;
+    background-color: red;
+    color: #ffffff;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.cancel:hover {
+    background-color: rgb(211, 1, 1);
+}
