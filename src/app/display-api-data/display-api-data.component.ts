@@ -2,27 +2,24 @@ import { Component, Inject, inject, Injectable } from '@angular/core';
 import { User } from '../models/user.model';
 import { CommonModule } from '@angular/common';
 import { HttpClient, HttpClientModule } from '@angular/common/http';
-import { Observable } from 'rxjs';
-import { FormsModule, ReactiveFormsModule } from '@angular/forms';
-import {MatDialog, MAT_DIALOG_DATA, MatDialogRef, MatDialogModule} from '@angular/material/dialog';
-import { DialogBoxComponent } from '../dialog-box/dialog-box.component';
+import { delay, map, Observable, of } from 'rxjs';
+import { AbstractControl, AsyncValidatorFn, FormControl, FormGroup, FormsModule, ReactiveFormsModule, ValidationErrors, ValidatorFn, Validators } from '@angular/forms';
 import { MatFormFieldModule } from '@angular/material/form-field';
-import { DialogData } from '../models/dialogdata.model';
+import { MatInputModule } from '@angular/material/input';
+import { UserForm } from '../models/userForm.model';
 
 @Component({
   selector: 'app-display-api-data',
   templateUrl: './display-api-data.component.html',
   styleUrls: ['./display-api-data.component.scss'],
   standalone: true,
-  imports: [CommonModule, HttpClientModule, ReactiveFormsModule,MatDialogModule, MatFormFieldModule, FormsModule],
+  imports: [CommonModule, HttpClientModule, ReactiveFormsModule, MatInputModule, MatFormFieldModule, FormsModule],
 })
 export class DisplayApiDataComponent {
 
-  constructor(private http: HttpClient, public dialog: MatDialog) { }
+  constructor(private http: HttpClient) { }
 
-  users!: User[];
-  animal!: string;
-  name!: string;
+  users: User[] | null = null;
 
   ngOnInit() {
     this.getUsers().subscribe({
@@ -37,21 +34,114 @@ export class DisplayApiDataComponent {
   }
 
   getUsersUrl = `https://jsonplaceholder.typicode.com/users`
+
   getUsers(): Observable<User[]> {
     return this.http.get<User[]>(this.getUsersUrl);
   }
 
-  openDialog(user:User): void {
-    console.log(user);
-    
-    const dialogRef = this.dialog.open(DialogBoxComponent, {
-      data:user,
-    });
+  isUserEditFormOpen = false;
+  data: User | null = null;
+  userForm: FormGroup | null = null;
 
-    dialogRef.afterClosed().subscribe(result => {
-      console.log('The dialog was closed');
-      this.animal = result;
-    });
+  editUserDetails(user: User): void {
+    console.log(user);
+    this.data = user;
+    this.isUserEditFormOpen = true
+
+    this.userForm = new FormGroup<UserForm>({
+      name: new FormControl(this.data.name, [Validators.required, this.forbiddenNameValidator()]),
+      username: new FormControl(this.data.username, [Validators.required, this.passValueToPhone()]),
+      city: new FormControl(this.data.address.city, [Validators.required]),
+      phone: new FormControl(this.data.phone,[],[]),
+      website: new FormControl(this.data.website, [Validators.required]),
+      company: new FormControl(this.data.company.name, [Validators.required])
+    })
+  }
+
+  forbiddenNameValidator(): ValidatorFn {
+    const names = ['santhosh', 'jeevan'];
+    return (control: AbstractControl): ValidationErrors | null => {
+      const forbidden = names.some(name => name === control.value);
+      return forbidden ? { forbiddenName: { value: control.value } } : null;
+    };
+  }
+
+  isPhoneNumberOptional = false;
+  username = '';
+  passValueToPhone(): ValidatorFn {
+    const names = ['santhosh', 'jeevan'];
+    this.forbiddenPhoneValidator();
+    return (control: AbstractControl): ValidationErrors | null => {
+      this.username = 
+      const forbidden = names.some(name => name === control.value);
+      this.isPhoneNumberOptional = forbidden;
+      console.log("forbidden", this.isPhoneNumberOptional);
+      return null;
+    }
+  }
+
+  getPhoneValidation(): ValidatorFn {
+    if (!this.isPhoneNumberOptional) {
+      return Validators.required;
+    }
+    else {
+      return (control: AbstractControl): ValidationErrors | null => {
+        return null;
+      }
+    }
+  }
+
+  forbiddenPhoneValidator(): ValidatorFn {
+    const names = ['santhosh', 'jeevan'];
+    return (control: AbstractControl): ValidationErrors | null => {
+      const username = this.userForm
+      const forbidden = names.some(name => name === username?.value);
+      console.log('FORBIDDEN', forbidden);
+      if (!forbidden) {
+        return Validators.required;
+      }
+      else {
+        return null
+      }
+    };
+  }
+
+  checkIfUsernameExists(value: string) {
+    const names = ['santhosh', 'jeevan'];
+    return of(names.some((a) => a === value)).pipe(
+      delay(10)
+    );
+  }
+
+  phoneValidation(): AsyncValidatorFn{
+    return (control: AbstractControl): Observable<ValidationErrors | null> => {
+      return this.checkIfUsernameExists(control.value)
+      .pipe(
+        map((result: boolean) =>
+          result ? { honeNumberOptional: true } : null
+        )
+      );
   }
 }
 
+  onCancelClick(): void {
+    this.isUserEditFormOpen = false;
+  }
+
+  onOkClick() {
+    if (this.userForm !== null && this.userForm.invalid) {
+      console.log("form not valid");
+    }
+    else {
+      if (this.data !== null && this.userForm !== null) {
+        this.data.name = this.userForm.value.name.toString();
+        this.data.username = this.userForm.value.username.toString();
+        this.data.address.city = this.userForm.value.city.toString();
+        this.data.phone = this.userForm.value.phone.toString();
+        this.data.website = this.userForm.value.website.toString();
+        this.data.company.name = this.userForm.value.company.toString();
+        this.isUserEditFormOpen = false;
+      }
+    }
+  }
+}

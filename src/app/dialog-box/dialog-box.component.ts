@@ -1,12 +1,10 @@
-import { Component, Inject } from '@angular/core';
+import { Component, Inject, Input } from '@angular/core';
 import { AbstractControl, FormControl, FormGroup, FormsModule, ReactiveFormsModule, ValidationErrors, ValidatorFn, Validators } from '@angular/forms';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
-import { DisplayApiDataComponent } from '../display-api-data/display-api-data.component';
 import { User } from '../models/user.model';
-import { DialogData } from '../models/dialogdata.model';
 import { CommonModule } from '@angular/common';
 
 @Component({
@@ -26,17 +24,67 @@ import { CommonModule } from '@angular/common';
 export class DialogBoxComponent {
   constructor(
     public dialogRef: MatDialogRef<DialogBoxComponent>,
-    @Inject(MAT_DIALOG_DATA) public data: User,
+    // @Inject(MAT_DIALOG_DATA) public data: User,
   ) { }
 
+  @Input() data!: User;
+  
   userForm = new FormGroup({
-    name: new FormControl(this.data.name, [Validators.required, forbiddenNameValidator()]),
-    username: new FormControl(this.data.username),
-    city: new FormControl(this.data.address.city),
-    phone: new FormControl(this.data.phone),
-    website: new FormControl(this.data.website),
-    company: new FormControl(this.data.company.name)
+    name: new FormControl<string>(this.data.name, [Validators.required, this.forbiddenNameValidator()]),
+    username: new FormControl<string>(this.data.username, [Validators.required, this.passValueToPhone()]),
+    city: new FormControl<string>(this.data.address.city, [Validators.required]),
+    phone: new FormControl<string>(this.data.phone, [this.getPhoneValidation()]),
+    website: new FormControl<string>(this.data.website, [Validators.required]),
+    company: new FormControl<string>(this.data.company.name, [Validators.required])
   })
+
+  forbiddenNameValidator(): ValidatorFn {
+    const names = ['santhosh', 'jeevan'];
+    return (control: AbstractControl): ValidationErrors | null => {
+      const forbidden = names.some(name => name === control.value);
+      return forbidden ? { forbiddenName: { value: control.value } } : null;
+    };
+  }
+
+
+  isPhoneNumberOptional = false;
+  passValueToPhone(): ValidatorFn {
+    const names = ['santhosh', 'jeevan'];
+    this.forbiddenPhoneValidator();
+    return (control: AbstractControl): ValidationErrors | null => {
+      const forbidden = names.some(name => name === control.value);
+      this.isPhoneNumberOptional = forbidden;
+      console.log("forbidden", this.isPhoneNumberOptional);
+      return null;
+    }
+  }
+
+  getPhoneValidation(): ValidatorFn {
+    if (!this.isPhoneNumberOptional) {
+      return Validators.required;
+    }
+    else{
+      return (control: AbstractControl): ValidationErrors | null => {
+      return null;
+      }
+    }
+  }
+
+  forbiddenPhoneValidator(): ValidatorFn {
+    const names = ['santhosh', 'jeevan'];
+    return (control: AbstractControl): ValidationErrors | null => {
+      const username = this.userForm
+      const forbidden = names.some(name => name === username?.value);
+      console.log('FORBIDDEN', forbidden);
+      if (!forbidden) {
+        return Validators.required;
+      }
+      else {
+        return null
+      }
+    };
+  }
+
 
   onNoClick(): void {
     this.dialogRef.close();
@@ -58,11 +106,5 @@ export class DialogBoxComponent {
   }
 }
 
-export function forbiddenNameValidator(): ValidatorFn {
-  const names = ['santhosh', 'jeevan'];
-  return (control: AbstractControl): ValidationErrors | null => {
-    const forbidden = names.some(name => name === control.value);
-    return forbidden ? { forbiddenName: { value: control.value } } : null;
-  };
-}
+
 
