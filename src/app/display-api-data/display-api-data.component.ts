@@ -7,7 +7,6 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import {MatDialog, MAT_DIALOG_DATA, MatDialogRef, MatDialogModule} from '@angular/material/dialog';
 import { DialogBoxComponent } from '../dialog-box/dialog-box.component';
 import { MatFormFieldModule } from '@angular/material/form-field';
-import { DialogData } from '../models/dialogdata.model';
 
 @Component({
   selector: 'app-display-api-data',
