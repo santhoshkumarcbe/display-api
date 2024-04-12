@@ -52,7 +52,7 @@ export class DisplayApiDataComponent {
       name: new FormControl(this.data.name, [Validators.required, this.forbiddenNameValidator()]),
       username: new FormControl(this.data.username, [Validators.required, this.passValueToPhone()]),
       city: new FormControl(this.data.address.city, [Validators.required]),
-      phone: new FormControl(this.data.phone,[],[]),
+      phone: new FormControl(this.data.phone,[],[this.phoneValidation()]),
       website: new FormControl(this.data.website, [Validators.required]),
       company: new FormControl(this.data.company.name, [Validators.required])
     })
@@ -66,59 +66,39 @@ export class DisplayApiDataComponent {
     };
   }
 
-  isPhoneNumberOptional = false;
+  // isPhoneNumberOptional = false;
   username = '';
   passValueToPhone(): ValidatorFn {
+    this.phoneValidation()
     const names = ['santhosh', 'jeevan'];
-    this.forbiddenPhoneValidator();
     return (control: AbstractControl): ValidationErrors | null => {
-      this.username = 
+      this.username = control.value
+      console.log('username', this.username);
+      
       const forbidden = names.some(name => name === control.value);
-      this.isPhoneNumberOptional = forbidden;
-      console.log("forbidden", this.isPhoneNumberOptional);
+      // this.isPhoneNumberOptional = forbidden;
+      // console.log("forbidden", this.isPhoneNumberOptional);
       return null;
     }
   }
 
-  getPhoneValidation(): ValidatorFn {
-    if (!this.isPhoneNumberOptional) {
-      return Validators.required;
-    }
-    else {
-      return (control: AbstractControl): ValidationErrors | null => {
-        return null;
-      }
-    }
-  }
-
-  forbiddenPhoneValidator(): ValidatorFn {
+  checkIfUsernameExists(value: string, phonenumber: string) {
     const names = ['santhosh', 'jeevan'];
-    return (control: AbstractControl): ValidationErrors | null => {
-      const username = this.userForm
-      const forbidden = names.some(name => name === username?.value);
-      console.log('FORBIDDEN', forbidden);
-      if (!forbidden) {
-        return Validators.required;
-      }
-      else {
-        return null
-      }
-    };
-  }
-
-  checkIfUsernameExists(value: string) {
-    const names = ['santhosh', 'jeevan'];
-    return of(names.some((a) => a === value)).pipe(
+    console.log('value',value , 'phonenumber', phonenumber);
+    
+    return of(names.some((a) =>{ 
+      a !== value && phonenumber === null
+    })).pipe(
       delay(10)
     );
   }
 
   phoneValidation(): AsyncValidatorFn{
     return (control: AbstractControl): Observable<ValidationErrors | null> => {
-      return this.checkIfUsernameExists(control.value)
+      return this.checkIfUsernameExists(this.username, control.value)
       .pipe(
-        map((result: boolean) =>
-          result ? { honeNumberOptional: true } : null
+        map((result: boolean) => 
+          result ? { phoneNumberOptional: true } : null
         )
       );
   }
