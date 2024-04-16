@@ -3,15 +3,7 @@
 <table>
   <thead>
     <tr>
-      <th>ID</th>
-      <th>Name</th>
-      <th>Username</th>
-      <th>Email</th>
-      <th>City</th>
-      <th>Phone</th>
-      <th>Website</th>
-      <th>Company</th>
-      <th>Edit</th>
+      <th *ngFor="let column of columns">{{column}}</th>
     </tr>
   </thead>
   <tbody>
@@ -31,18 +23,20 @@
 
 <div class="overlay" *ngIf="isUserEditFormOpen">
   <div class="dialog-box">
-    <form *ngIf="data !== null && userForm !== null" [formGroup]="userForm">
-      <h1>{{data.name}} Details</h1>
+    <form [formGroup]="userForm">
+      <h1>User Details</h1>
       <div>
         <mat-form-field appearance="fill">
           <mat-label>Email</mat-label>
-          <input matInput disabled="true" matInput [value]="data.email">
+          <input matInput matInput formControlName="email">
         </mat-form-field>
         <br>
         <mat-form-field appearance="fill">
           <mat-label>Name</mat-label>
           <input matInput formControlName="name">
-          <mat-error>Name should not be {{userForm.value.name ? userForm.value.name: 'empty'}}</mat-error>
+          <mat-error *ngIf="!userForm.get('name')?.hasError('required')">Name should not be
+            {{userForm.value.name}}</mat-error>
+          <mat-error *ngIf="userForm.get('name')?.hasError('required')">Name required</mat-error>
         </mat-form-field>
         <br>
         <mat-form-field appearance="fill">
@@ -77,9 +71,8 @@
       </div>
     </form>
     <div>
-      <button class="cancel" mat-button (click)="onCancelClick()"><span
-          style="color: white; background-color: red;">Cancel</span></button>
-      <button class="ok" mat-button (click)="onOkClick()"><span style="color: white; ">OK</span></button>
+      <button class="cancel-btn" mat-button (click)="onCancelClick()">Cancel</button>
+      <button class="submit-btn" mat-button (click)="onOkClick()">Ok</button>
     </div>
   </div>
 </div>

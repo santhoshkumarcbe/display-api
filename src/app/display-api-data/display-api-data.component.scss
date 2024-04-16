@@ -1,3 +1,5 @@
+$font_size: 15px;
+
 * {
   margin: 1px;
   display: fixed;
@@ -8,8 +10,7 @@ table {
   width: 100%;
 }
 
-th,
-td {
+th, td {
   border: 1px solid #dddddd;
   text-align: left;
   padding: 8px;
@@ -23,12 +24,11 @@ tr:nth-child(even) {
   background-color: #f2f2f2;
 }
 
-
-
 .edit-button {
-  background-color: #4CAF50;
+  background-color: hsl(122, 39%, 49%);
   color: white;
   padding: 5px 10px;
+  font-size: $font_size;
   border: none;
   border-radius: 4px;
   cursor: pointer;
@@ -47,34 +47,35 @@ tr:nth-child(even) {
   background-color: #ffffff;
 }
 
-
-.ok {
+.submit-btn {
   transition: 1000ms;
   margin: 10px;
   padding: 10px 20px;
   background-color: #00cc3a;
   color: #fff;
+  font-size: $font_size;
   border: none;
   border-radius: 4px;
   cursor: pointer;
 }
 
-.ok:hover {
+.submit-btn:hover {
   background-color: #04ae34;
 }
 
-.cancel {
+.cancel-btn {
   transition: 1000ms;
   margin: 10px;
   padding: 10px 20px;
   background-color: red;
+  font-size: $font_size;
   color: #ffffff;
   border: none;
   border-radius: 4px;
   cursor: pointer;
 }
 
-.cancel:hover {
+.cancel-btn:hover {
   background-color: rgb(211, 1, 1);
 }
 

@@ -1,91 +1,107 @@
-import { Component, Inject, inject, Injectable } from '@angular/core';
-import { User } from '../models/user.model';
+import { Component, inject } from '@angular/core';
+import { User, UserForm } from '../models/user.model';
 import { CommonModule } from '@angular/common';
 import { HttpClient, HttpClientModule } from '@angular/common/http';
-import { delay, map, Observable, of } from 'rxjs';
-import { AbstractControl, AsyncValidatorFn, FormControl, FormGroup, FormsModule, ReactiveFormsModule, ValidationErrors, ValidatorFn, Validators } from '@angular/forms';
-import { MatFormFieldModule } from '@angular/material/form-field';
+import { Observable } from 'rxjs';
+import { AbstractControl, FormControl, FormGroup, ReactiveFormsModule, ValidationErrors, ValidatorFn, Validators } from '@angular/forms';
 import { MatInputModule } from '@angular/material/input';
-import { UserForm } from '../models/userForm.model';
+import { environment } from 'src/environments/environment.development';
+
 
 @Component({
   selector: 'app-display-api-data',
   templateUrl: './display-api-data.component.html',
   styleUrls: ['./display-api-data.component.scss'],
   standalone: true,
-  imports: [CommonModule, HttpClientModule, ReactiveFormsModule, MatInputModule, MatFormFieldModule, FormsModule],
+  imports: [CommonModule, HttpClientModule, ReactiveFormsModule, MatInputModule],
 })
 export class DisplayApiDataComponent {
 
-  constructor(private http: HttpClient) { }
+  constructor() { }
 
+  http: HttpClient = inject(HttpClient);
+
+  columns = ['ID', 'Name', 'Username', 'Email', 'City', 'Phone', 'Website', 'Company', 'Edit'];
+  names = ['santhosh', 'jeevan'];
   users: User[] | null = null;
+  isPhoneNumberOptional = false;
+  isUserEditFormOpen = false;
+  user: User | null = null;
+  getUsersUrl = `${environment.baseUrl}/users`
+
+  userForm = new FormGroup<UserForm>({
+    email: new FormControl<string>(''),
+    name: new FormControl<string>(''),
+    username: new FormControl<string>(''),
+    city: new FormControl(),
+    phone: new FormControl(),
+    website: new FormControl(),
+    company: new FormControl()
+  })
 
   ngOnInit() {
     this.getUsers().subscribe({
       next: data => {
         this.users = data;
-        // console.log(this.users);
       },
       error: error => {
         console.error(error);
       }
     })
-
   }
-
-  getUsersUrl = `https://jsonplaceholder.typicode.com/users`
 
   getUsers(): Observable<User[]> {
     return this.http.get<User[]>(this.getUsersUrl);
   }
 
-  isUserEditFormOpen = false;
-  data: User | null = null;
-  userForm: FormGroup | null = null;
-
   editUserDetails(user: User): void {
-    // console.log(user);
-    this.data = user;
+    this.user = user;
     this.isUserEditFormOpen = true
-
     this.userForm = new FormGroup<UserForm>({
-      name: new FormControl(this.data.name, [Validators.required, this.forbiddenNameValidator()]),
-      username: new FormControl(this.data.username, [Validators.required, this.checkUsernameForPhoneValidation()]),
-      city: new FormControl(this.data.address.city, [Validators.required]),
-      phone: new FormControl(this.data.phone, [this.phoneNumberRequiredValidation()]),
-      website: new FormControl(this.data.website, [Validators.required]),
-      company: new FormControl(this.data.company.name, [Validators.required])
+      email: new FormControl({ value: this.user.email, disabled: true }, [Validators.required]),
+      name: new FormControl(this.user.name, [Validators.required, this.forbiddenNameValidator()]),
+      username: new FormControl(this.user.username, [Validators.required, this.checkUsernameForPhoneValidation()]),
+      city: new FormControl(this.user.address.city, [Validators.required]),
+      phone: new FormControl(this.user.phone, [Validators.required]),
+      website: new FormControl(this.user.website, [Validators.required]),
+      company: new FormControl(this.user.company.name, [Validators.required])
     })
-
   }
 
   forbiddenNameValidator(): ValidatorFn {
-    const names = ['santhosh', 'jeevan'];
     return (control: AbstractControl): ValidationErrors | null => {
-      const forbidden = names.some(name => name === control.value);
-      return forbidden ? { forbiddenName: { value: control.value } } : null;
+      let isInputNameContainsInNames = false;
+      this.names.forEach(name => {
+        if (name === control.value) {
+          isInputNameContainsInNames = true
+        }
+      })
+      return isInputNameContainsInNames ? { forbiddenName: { value: control.value } } : null;
     };
   }
 
-  isPhoneNumberOptional = false;
-  username = '';
-
   checkUsernameForPhoneValidation(): ValidatorFn {
-    const names = ['santhosh', 'jeevan'];
-    // this.userForm?.controls['phone'].markAsDirty();
     return (control: AbstractControl): ValidationErrors | null => {
-      this.username = control.value
-      const forbidden = names.some(name => name === control.value);
-      this.isPhoneNumberOptional = forbidden;
+      const phoneControl = this.userForm.get('phone');
+      const isInputNameContainsInNames = this.names.some(name => name === control.value);
+      this.isPhoneNumberOptional = isInputNameContainsInNames;
+
+      if (isInputNameContainsInNames) {
+        phoneControl?.clearValidators();
+        phoneControl?.updateValueAndValidity();
+      } else {
+        phoneControl?.addValidators(Validators.required)
+        phoneControl?.updateValueAndValidity();
+      }
+      
       return null;
     }
   }
 
   phoneNumberRequiredValidation(): ValidatorFn {
-    return (control:  AbstractControl): ValidationErrors | null => {
+    return (control: AbstractControl): ValidationErrors | null => {
       const error: boolean = !this.isPhoneNumberOptional && control.value === ''
-      return error ? {required: true} : null;
+      return error ? { required: true } : null;
     };
   }
 
@@ -94,19 +110,14 @@ export class DisplayApiDataComponent {
   }
 
   onOkClick() {
-    if (this.userForm !== null && this.userForm.invalid) {
-      // console.log("form not valid");
-    }
-    else {
-      if (this.data !== null && this.userForm !== null) {
-        this.data.name = this.userForm.value.name.toString();
-        this.data.username = this.userForm.value.username.toString();
-        this.data.address.city = this.userForm.value.city.toString();
-        this.data.phone = this.userForm.value.phone.toString();
-        this.data.website = this.userForm.value.website.toString();
-        this.data.company.name = this.userForm.value.company.toString();
-        this.isUserEditFormOpen = false;
-      }
+    if (this.user !== null && this.userForm !== null && this.userForm.valid) {
+      this.user.name = this.userForm.value.name!.toString();
+      this.user.username = this.userForm.value.username!.toString();
+      this.user.address.city = this.userForm.value.city!.toString();
+      this.user.phone = this.userForm.value.phone!.toString();
+      this.user.website = this.userForm.value.website!.toString();
+      this.user.company.name = this.userForm.value.company!.toString();
+      this.isUserEditFormOpen = false;
     }
   }
 }
