@@ -1,40 +1,86 @@
+$font_size: 15px;
+
 * {
-    margin: 1px;
-    display: fixed;
-  }
-  
-  table {
-    border-collapse: collapse;
-    width: 100%;
-  }
-  
-  th,
-  td {
-    border: 1px solid #dddddd;
-    text-align: left;
-    padding: 8px;
-  }
-  
-  th {
-    background-color: #f2f2f2;
-  }
-  
-  tr:nth-child(even) {
-    background-color: #f2f2f2;
-  }
+  margin: 1px;
+  display: fixed;
+}
 
+table {
+  border-collapse: collapse;
+  width: 100%;
+}
 
+th, td {
+  border: 1px solid #dddddd;
+  text-align: left;
+  padding: 8px;
+}
 
-  .edit-button {
-    background-color: #4CAF50; 
-    color: white; 
-    padding: 5px 10px; 
-    border: none; 
-    border-radius: 4px; 
-    cursor: pointer;
-  }
-  
-  .edit-button:hover {
-    background-color: #3e8e41;
-  }
-  
+th {
+  background-color: #f2f2f2;
+}
+
+tr:nth-child(even) {
+  background-color: #f2f2f2;
+}
+
+.edit-button {
+  background-color: hsl(122, 39%, 49%);
+  color: white;
+  padding: 5px 10px;
+  font-size: $font_size;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.edit-button:hover {
+  background-color: #3e8e41;
+}
+
+// dialog-box
+
+.dialog-box {
+  padding-top: 20px;
+  padding-left: 200px;
+  z-index: 1000;
+  background-color: #ffffff;
+}
+
+.submit-btn {
+  transition: 1000ms;
+  margin: 10px;
+  padding: 10px 20px;
+  background-color: #00cc3a;
+  color: #fff;
+  font-size: $font_size;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.submit-btn:hover {
+  background-color: #04ae34;
+}
+
+.cancel-btn {
+  transition: 1000ms;
+  margin: 10px;
+  padding: 10px 20px;
+  background-color: red;
+  font-size: $font_size;
+  color: #ffffff;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.cancel-btn:hover {
+  background-color: rgb(211, 1, 1);
+}
+
+.overlay{
+  height: 100%;
+  width: 100%;
+  position: absolute;
+}
