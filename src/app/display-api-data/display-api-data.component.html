@@ -1,5 +1,4 @@
 <h1>User details</h1>
-
 <table>
   <thead>
     <tr>
@@ -7,7 +6,7 @@
     </tr>
   </thead>
   <tbody>
-    <tr *ngFor="let user of users">
+    <tr *ngFor="let user of users$ | async">
       <td>{{user.id}}</td>
       <td>{{user.name}}</td>
       <td>{{user.username}}</td>
@@ -23,7 +22,7 @@
 
 <div class="overlay" *ngIf="isUserEditFormOpen">
   <div class="dialog-box">
-    <form [formGroup]="userForm">
+    <form [formGroup]="userForm" (ngSubmit)="onOkClick()">
       <h1>User Details</h1>
       <div>
         <mat-form-field appearance="fill">
@@ -34,7 +33,7 @@
         <mat-form-field appearance="fill">
           <mat-label>Name</mat-label>
           <input matInput formControlName="name">
-          <mat-error *ngIf="!userForm.get('name')?.hasError('required')">Name should not be
+          <mat-error *ngIf="userForm.get('name')?.hasError('forbiddenName')">Name should not be
             {{userForm.value.name}}</mat-error>
           <mat-error *ngIf="userForm.get('name')?.hasError('required')">Name required</mat-error>
         </mat-form-field>
@@ -69,10 +68,11 @@
           <mat-error>company name required</mat-error>
         </mat-form-field>
       </div>
+      <button class="cancel-btn" mat-button (click)="onCancelClick()">Cancel</button>
+      <button type="submit" class="submit-btn" mat-button>Ok</button>
     </form>
     <div>
-      <button class="cancel-btn" mat-button (click)="onCancelClick()">Cancel</button>
-      <button class="submit-btn" mat-button (click)="onOkClick()">Ok</button>
+
     </div>
   </div>
 </div>

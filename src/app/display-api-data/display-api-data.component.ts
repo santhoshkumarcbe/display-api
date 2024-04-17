@@ -7,7 +7,6 @@ import { AbstractControl, FormControl, FormGroup, ReactiveFormsModule, Validatio
 import { MatInputModule } from '@angular/material/input';
 import { environment } from 'src/environments/environment.development';
 
-
 @Component({
   selector: 'app-display-api-data',
   templateUrl: './display-api-data.component.html',
@@ -23,32 +22,21 @@ export class DisplayApiDataComponent {
 
   columns = ['ID', 'Name', 'Username', 'Email', 'City', 'Phone', 'Website', 'Company', 'Edit'];
   names = ['santhosh', 'jeevan'];
-  users: User[] | null = null;
   isPhoneNumberOptional = false;
   isUserEditFormOpen = false;
   user: User | null = null;
   getUsersUrl = `${environment.baseUrl}/users`
+  users$: Observable<User[]> = this.getUsers();
 
   userForm = new FormGroup<UserForm>({
-    email: new FormControl<string>(''),
-    name: new FormControl<string>(''),
-    username: new FormControl<string>(''),
-    city: new FormControl(),
-    phone: new FormControl(),
-    website: new FormControl(),
-    company: new FormControl()
+    email: new FormControl({ value: null, disabled: true }, [Validators.required]),
+    name: new FormControl(null, [Validators.required, this.forbiddenNameValidator()]),
+    username: new FormControl(null, [Validators.required, this.checkUsernameForPhoneValidation()]),
+    city: new FormControl(null, [Validators.required]),
+    phone: new FormControl(null, [Validators.required]),
+    website: new FormControl(null, [Validators.required]),
+    company: new FormControl(null, [Validators.required])
   })
-
-  ngOnInit() {
-    this.getUsers().subscribe({
-      next: data => {
-        this.users = data;
-      },
-      error: error => {
-        console.error(error);
-      }
-    })
-  }
 
   getUsers(): Observable<User[]> {
     return this.http.get<User[]>(this.getUsersUrl);
@@ -57,15 +45,14 @@ export class DisplayApiDataComponent {
   editUserDetails(user: User): void {
     this.user = user;
     this.isUserEditFormOpen = true
-    this.userForm = new FormGroup<UserForm>({
-      email: new FormControl({ value: this.user.email, disabled: true }, [Validators.required]),
-      name: new FormControl(this.user.name, [Validators.required, this.forbiddenNameValidator()]),
-      username: new FormControl(this.user.username, [Validators.required, this.checkUsernameForPhoneValidation()]),
-      city: new FormControl(this.user.address.city, [Validators.required]),
-      phone: new FormControl(this.user.phone, [Validators.required]),
-      website: new FormControl(this.user.website, [Validators.required]),
-      company: new FormControl(this.user.company.name, [Validators.required])
-    })
+
+    this.userForm.get('email')?.setValue(user.email);
+    this.userForm.get('name')?.setValue(user.name);
+    this.userForm.get('username')?.setValue(user.username);
+    this.userForm.get('city')?.setValue(user.address.city);
+    this.userForm.get('phone')?.setValue(user.phone);
+    this.userForm.get('website')?.setValue(user.website);
+    this.userForm.get('company')?.setValue(user.company.name);
   }
 
   forbiddenNameValidator(): ValidatorFn {
@@ -82,7 +69,7 @@ export class DisplayApiDataComponent {
 
   checkUsernameForPhoneValidation(): ValidatorFn {
     return (control: AbstractControl): ValidationErrors | null => {
-      const phoneControl = this.userForm.get('phone');
+      const phoneControl = this.userForm?.get('phone');
       const isInputNameContainsInNames = this.names.some(name => name === control.value);
       this.isPhoneNumberOptional = isInputNameContainsInNames;
 
@@ -93,7 +80,7 @@ export class DisplayApiDataComponent {
         phoneControl?.addValidators(Validators.required)
         phoneControl?.updateValueAndValidity();
       }
-      
+
       return null;
     }
   }
@@ -110,7 +97,7 @@ export class DisplayApiDataComponent {
   }
 
   onOkClick() {
-    if (this.user !== null && this.userForm !== null && this.userForm.valid) {
+    if (this.userForm.valid && this.user) {
       this.user.name = this.userForm.value.name!.toString();
       this.user.username = this.userForm.value.username!.toString();
       this.user.address.city = this.userForm.value.city!.toString();
